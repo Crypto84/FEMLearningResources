@@ -1,14 +1,22 @@
 FROM ghcr.io/jorgensd/dolfinx-tutorial:v0.5.1
 
-# create user with a home directory
+# Create user with a home directory
 ARG NB_USER=jovyan
 ARG NB_UID=1000
-RUN useradd -m ${NB_USER} -u ${NB_UID}
+ENV USER ${NB_USER}
+ENV NB_UID ${NB_UID}
 ENV HOME /home/${NB_USER}
 
-# Copy home directory for usage in binder
-WORKDIR ${HOME}
-COPY --chown=${NB_UID} . ${HOME}
+RUN adduser --disabled-password \
+    --gecos "Default user" \
+    --uid ${NB_UID} \
+    ${NB_USER}
 
+
+# Make sure the contents of our repo are in ${HOME}
+COPY . ${HOME}
+USER root
+RUN chown -R ${NB_UID} ${HOME}
 USER ${NB_USER}
+
 ENTRYPOINT []
